@@ -1,0 +1,27 @@
+{
+  "name": "lifecycle-checker-app",
+  "version": "1.0.0",
+  "description": "A simple Electron app",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron .",
+    "build": "electron-packager . --platform=win32 --arch=x64 --out=dist --overwrite",
+    "build:win": "electron-packager . --platform=win32 --arch=x64 --out=dist --overwrite"
+  },
+  "build": {
+    "appId": "com.company.myapp",
+    "productName": "MyApp",
+    "compression": "maximum",
+    "win": {
+      "target": "portable"
+    }
+  },
+  "keywords": ["electron"],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-packager": "^17.1.1"
+  }
+}
