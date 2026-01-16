@@ -17,7 +17,7 @@ const MYSQL_BASE = path.join(APP_ROOT, "mysql")
 const MYSQL_BIN = path.join(MYSQL_BASE, "bin", "mysqld.exe")
 const AZURE_BIN = path.join(APP_ROOT, "azure-cli", "bin", "az.cmd")
 const AZURE_LOGIN_CHECK = `"${AZURE_BIN}" account show`
-const AZURE_LOGIN_CMD = `"${AZURE_BIN}" login --use-device-code`
+const AZURE_LOGIN_CMD = `"${AZURE_BIN}" login`
 const MYSQL_DATA = path.join(MYSQL_BASE, "data")
 const MYSQL_SYSTEM_DB = path.join(MYSQL_DATA, "mysql")
 const MYSQL_INI = path.join(MYSQL_BASE, "my.ini")
@@ -165,7 +165,7 @@ function loginAzure() {
     
     // Use start command to open a new visible window and wait for it
     // /wait makes start wait for the command to complete
-    const command = `start /wait cmd.exe /k "${AZURE_BIN}" login --use-device-code`
+    const command = `start /wait cmd.exe /k "${AZURE_BIN}" login`
     
     exec(command, {
       windowsHide: false,
