@@ -1,6 +1,6 @@
 const { app, BrowserWindow, Menu } = require("electron")
 const path = require("path")
-const { spawn, execSync, exec } = require("child_process")
+const { spawn, execSync } = require("child_process")
 const fs = require("fs")
 const net = require("net")
 
@@ -15,12 +15,8 @@ let mysqlProcess = null
 const APP_ROOT = __dirname
 const MYSQL_BASE = path.join(APP_ROOT, "mysql")
 const MYSQL_BIN = path.join(MYSQL_BASE, "bin", "mysqld.exe")
-const AZURE_BIN = path.join(APP_ROOT, "azure-cli", "bin", "az.cmd")
-const AZURE_LOGIN_CHECK = `"${AZURE_BIN}" account show`
-const AZURE_LOGIN_CMD = `"${AZURE_BIN}" login`
 const MYSQL_DATA = path.join(MYSQL_BASE, "data")
 const MYSQL_SYSTEM_DB = path.join(MYSQL_DATA, "mysql")
-const MYSQL_INI = path.join(MYSQL_BASE, "my.ini")
 
 // --------------------
 // Logging
@@ -139,66 +135,6 @@ function waitForMySQL(port = 3306, timeout = 60000) {
 }
 
 // --------------------
-// Azure Login Check
-// --------------------
-function checkAzureLogin() {
-  try {
-    console.log(AZURE_LOGIN_CHECK)
-    execSync(AZURE_LOGIN_CHECK, { 
-      stdio: 'ignore',
-      timeout: 10000 
-    })
-    log("Azure CLI is logged in")
-    return true
-  } catch (err) {
-    log("Azure CLI is not logged in")
-    return false
-  }
-}
-
-// --------------------
-// Azure Login (with visible window)
-// --------------------
-function loginAzure() {
-  return new Promise((resolve, reject) => {
-    log("Starting Azure login (visible window)")
-    
-    // Use start command to open a new visible window and wait for it
-    // /wait makes start wait for the command to complete
-    const command = `start /wait cmd.exe /k "${AZURE_BIN}" login`
-    
-    exec(command, {
-      windowsHide: false,
-      shell: true
-    }, (error, stdout, stderr) => {
-      if (error) {
-        log(`Azure login error: ${error.message}`, true)
-        // Check if login succeeded despite error
-        if (checkAzureLogin()) {
-          log("Azure login completed successfully (despite error)")
-          resolve(true)
-        } else {
-          resolve(false)
-        }
-        return
-      }
-      
-      log("Azure login window closed")
-      // Verify login was successful
-      setTimeout(() => {
-        if (checkAzureLogin()) {
-          log("Azure login completed successfully")
-          resolve(true)
-        } else {
-          log("Azure login verification failed", true)
-          resolve(false)
-        }
-      }, 1000)
-    })
-  })
-}
-
-// --------------------
 // Start API
 // --------------------
 function startApi() {
@@ -251,19 +187,6 @@ app.whenReady().then(async () => {
   log("Application starting")
 
   try {
-    // Check Azure login first
-    if (!checkAzureLogin()) {
-      log("Azure login required, prompting user...")
-      await loginAzure()
-      // Verify login after prompt
-      if (!checkAzureLogin()) {
-        log("Azure login verification failed", true)
-        app.quit()
-        return
-      }
-    }
-    
-    // Start other processes after Azure login is confirmed
     startMySQL()
     await waitForMySQL()
     startApi()
